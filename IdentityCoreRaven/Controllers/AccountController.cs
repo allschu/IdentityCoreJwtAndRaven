@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Text;
 using IdentityCoreRaven.Models;
 using Infrastructure;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -32,7 +31,7 @@ namespace IdentityCoreRaven.Controllers
 
         
         [HttpGet]
-        [Authorize(Roles = CustomUser.AdminRole)]
+//        [Authorize(Roles = CustomUser.AdminRole)]
         public async Task<IEnumerable<string>> GetAsync()
         {
             var users = await _userManager.Users.ToListAsync();
@@ -42,7 +41,6 @@ namespace IdentityCoreRaven.Controllers
 
 
         [HttpPost]
-        [Authorize(Roles = CustomUser.AdminRole)]
         public async Task<IActionResult> PostAsync([FromBody] string value, CancellationToken cancellationToken)
         {
             var user = new CustomUser
@@ -95,7 +93,7 @@ namespace IdentityCoreRaven.Controllers
 
                 var token = new JwtSecurityToken(
                     issuer: _configuration["JwtSettings:Issuer"],
-                    audience: _configuration[""],
+                    audience: _configuration["JwtSettings:Audience"],
                     claims: claims,
                     expires: DateTime.Now.AddMinutes(30),
                     signingCredentials: creds);
