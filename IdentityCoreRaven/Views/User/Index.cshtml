@@ -1,0 +1,45 @@
+﻿@model List<Infrastructure.CustomUser>
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<h1>Users</h1>
+
+<p>
+    <button asp-controller="User" asp-action="Create">Create new user</button>
+</p>
+
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Username
+            </th>
+            <th>
+                Email
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    <a asp-controller="User" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-controller="User" asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-controller="User" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
