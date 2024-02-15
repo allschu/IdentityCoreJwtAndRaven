@@ -7,6 +7,9 @@ using Raven.Client.Documents.Session;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Raven.Client.Documents;
 
 namespace IdentityCoreRaven.Controllers
 {
@@ -24,6 +27,16 @@ namespace IdentityCoreRaven.Controllers
             _configuration = configuration;
             _roleManager = roleManager;
             _userManager = userManager;
+        }
+
+
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetAsync(CancellationToken cancellationToken)
+        {
+            var users = await _userManager.Users.ToListAsync(cancellationToken);
+
+            return Ok(users.Select(x => x.Email).ToArray());
         }
 
         /// <summary>

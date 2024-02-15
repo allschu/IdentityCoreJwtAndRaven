@@ -40,7 +40,7 @@ namespace IdentityCoreRaven.Controllers
             }
 
             // Add user to the manager role, change this to a role that makes sense
-            var roleManagerResult = await this._userManager.AddToRoleAsync(user, CustomUser.ManagerRole);
+            var roleUserResult = await this._userManager.AddToRoleAsync(user, CustomUser.UserRole);
             var roleResult = await this._userManager.AddToRoleAsync(user, CustomUser.AdminRole);
 
             if (!roleResult.Succeeded)

@@ -3,38 +3,46 @@ using Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Raven.Client.Documents.Session;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace IdentityCoreRaven.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AccountController : RavenController
+    
+    public class AccountController : Controller
     {
         private readonly SignInManager<CustomUser> _signInManager;
         
-        public AccountController(IAsyncDocumentSession dbSession)
-            : base(dbSession)
+        public AccountController(SignInManager<CustomUser> signInManager)
         {
-            
+            _signInManager = signInManager;
         }
-        
+
 
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult Login(string returnUrl = null)
         {
+            
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LogOff()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
+
+
 
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
+
             if (ModelState.IsValid)
             {
                 // This doesn't count login failures towards account lockout
@@ -43,7 +51,7 @@ namespace IdentityCoreRaven.Controllers
                 if (result.Succeeded)
                 {
 
-                    return Ok();
+                    return RedirectToAction(nameof(HomeController.Index), "Home");
                 }
                 //if (result.RequiresTwoFactor)
                 //{
@@ -62,10 +70,8 @@ namespace IdentityCoreRaven.Controllers
             }
 
             // If we got this far, something failed, redisplay form
-            return BadRequest();
+            return View(model);
         }
-
-
 
     }
 }

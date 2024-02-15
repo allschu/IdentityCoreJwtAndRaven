@@ -21,7 +21,7 @@ namespace IdentityCoreRaven.Controllers
 
         // GET: api/<RoleController>
         [HttpGet]
-        [Authorize(Roles = CustomUser.ManagerRole)]
+        [Authorize(Roles = CustomUser.AdminRole)]
         public async Task<IActionResult> Get()
         {
             var roles = await _roleManager.Roles.ToListAsync();
