@@ -18,9 +18,10 @@ namespace Infrastructure
                         options.Lockout.MaxFailedAccessAttempts = 3;
                         options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
                     }) // Add the Identity services for Intello User to the DI container. 
-                .AddSignInManager<SignInManager<CustomUser>>() // Add the SignInManager to the DI container.
+                .AddSignInManager() // Add the SignInManager to the DI container.
                 .AddRoles<IdentityRole>() // Add the Add roles to the DI container.
                 .AddRoleManager<RoleManager<IdentityRole>>()
+                .AddDefaultTokenProviders()
                 .AddRavenDbIdentityStores<CustomUser, IdentityRole>(); // Use Raven as the Identity store for user users and roles.
 
             return services;
