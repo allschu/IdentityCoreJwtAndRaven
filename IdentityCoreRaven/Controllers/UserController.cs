@@ -1,30 +1,31 @@
 ﻿using Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Raven.Client.Documents;
 
 namespace IdentityCoreRaven.Controllers
 {
+    [Authorize]
     public class UserController : Controller
     {
         private readonly UserManager<CustomUser> _userManager;
        
-        public UserController()
+        public UserController(UserManager<CustomUser> userManager)
         {
-            
+            _userManager = userManager;
         }
 
         [HttpGet]
-        //        [Authorize(Roles = CustomUser.AdminRole)]
-        public async Task<IEnumerable<string>> GetAsync(CancellationToken cancellationToken)
+        public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
         {
             var users = await _userManager.Users.ToListAsync(cancellationToken);
-
-            return users.Select(x => x.Email).ToArray();
+            
+            return View(users);
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostAsync([FromBody] string value, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create([FromBody] string value, CancellationToken cancellationToken)
         {
             var user = new CustomUser
             {
