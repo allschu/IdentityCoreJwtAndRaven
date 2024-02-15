@@ -17,8 +17,7 @@ namespace IdentityCoreRaven.Controllers
         {
             _signInManager = signInManager;
         }
-
-
+        
         [HttpGet]
         public IActionResult Login(string returnUrl = null)
         {

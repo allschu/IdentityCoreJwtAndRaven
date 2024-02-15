@@ -1,17 +1,20 @@
-﻿using Infrastructure;
+﻿using IdentityCoreRaven.Models.AccountViewModels;
+using Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Session;
 
 namespace IdentityCoreRaven.Controllers
 {
     [Authorize]
-    public class UserController : Controller
+    public class UserController : RavenController
     {
         private readonly UserManager<CustomUser> _userManager;
        
-        public UserController(UserManager<CustomUser> userManager)
+        public UserController(UserManager<CustomUser> userManager, IAsyncDocumentSession dbSession)
+            : base(dbSession)
         {
             _userManager = userManager;
         }
@@ -24,32 +27,48 @@ namespace IdentityCoreRaven.Controllers
             return View(users);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] string value, CancellationToken cancellationToken)
+        [HttpGet]
+        public IActionResult Create()
         {
-            var user = new CustomUser
-            {
-                UserName = value,
-                Email = value
-            };
+            return View();
+        }
 
-            var creationResult = await _userManager.CreateAsync(user, "Welkom123!");
-
-            if (!creationResult.Succeeded)
+        [HttpPost]
+        public async Task<IActionResult> CreateAsync(RegisterViewModel model, CancellationToken cancellationToken = default)
+        {
+            if (ModelState.IsValid)
             {
-                return BadRequest(creationResult.Errors);
+
+                var user = new CustomUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    LastName = model.LastName,
+                    FirstName = model.FirstName
+                };
+
+                var creationResult = await _userManager.CreateAsync(user, model.Password);
+
+                if (!creationResult.Succeeded)
+                {
+                    //Todo handle errors in ui
+                }
+
+                await this._userManager.AddToRoleAsync(user, CustomUser.UserRole);
+
+                if (model.IsAdmin) //check if user needs to be admin
+                {
+                    var roleResult = await this._userManager.AddToRoleAsync(user, CustomUser.AdminRole);
+                    if (!roleResult.Succeeded)
+                    {
+                        //todo 
+                    }
+                }
+                
+                return RedirectToAction("Index");
             }
 
-            // Add user to the manager role, change this to a role that makes sense
-            var roleUserResult = await this._userManager.AddToRoleAsync(user, CustomUser.UserRole);
-            var roleResult = await this._userManager.AddToRoleAsync(user, CustomUser.AdminRole);
-
-            if (!roleResult.Succeeded)
-            {
-                return BadRequest(roleResult.Errors);
-            }
-
-            return Ok();
+            return View(model);
         }
 
 
