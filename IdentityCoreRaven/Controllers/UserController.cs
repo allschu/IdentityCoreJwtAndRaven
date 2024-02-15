@@ -1,60 +1,56 @@
-﻿using IdentityCoreRaven.Models.AccountViewModels;
-using Infrastructure;
-using Microsoft.AspNetCore.Authorization;
+﻿using Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Raven.Client.Documents;
 
 namespace IdentityCoreRaven.Controllers
 {
     public class UserController : Controller
     {
-        private readonly SignInManager<CustomUser> _signInManager;
-        public UserController(SignInManager<CustomUser> signInManager)
+        private readonly UserManager<CustomUser> _userManager;
+       
+        public UserController()
         {
-            _signInManager = signInManager;
+            
         }
 
         [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Login(string returnUrl = null)
+        //        [Authorize(Roles = CustomUser.AdminRole)]
+        public async Task<IEnumerable<string>> GetAsync(CancellationToken cancellationToken)
         {
-            ViewData["ReturnUrl"] = returnUrl;
-            return View();
+            var users = await _userManager.Users.ToListAsync(cancellationToken);
+
+            return users.Select(x => x.Email).ToArray();
         }
 
         [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> PostAsync([FromBody] string value, CancellationToken cancellationToken)
         {
-            if (ModelState.IsValid)
+            var user = new CustomUser
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
-                if (result.Succeeded)
-                {
+                UserName = value,
+                Email = value
+            };
 
-                    return Ok();
-                }
-                //if (result.RequiresTwoFactor)
-                //{
-                //    return RedirectToAction(nameof(SendCode), new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
-                //}
-                //if (result.IsLockedOut)
-                //{
-                //    _logger.LogWarning(2, "User account locked out.");
-                //    return View("Lockout");
-                //}
-                //else
-                //{
-                //    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                //    return View(model);
-                //}
+            var creationResult = await _userManager.CreateAsync(user, "Welkom123!");
+
+            if (!creationResult.Succeeded)
+            {
+                return BadRequest(creationResult.Errors);
             }
 
-            // If we got this far, something failed, redisplay form
-            return BadRequest();
+            // Add user to the manager role, change this to a role that makes sense
+            var roleManagerResult = await this._userManager.AddToRoleAsync(user, CustomUser.ManagerRole);
+            var roleResult = await this._userManager.AddToRoleAsync(user, CustomUser.AdminRole);
+
+            if (!roleResult.Succeeded)
+            {
+                return BadRequest(roleResult.Errors);
+            }
+
+            return Ok();
         }
+
+
     }
 }
