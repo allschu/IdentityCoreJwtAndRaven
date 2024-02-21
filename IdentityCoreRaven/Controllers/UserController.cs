@@ -1,14 +1,14 @@
 ﻿using IdentityCoreRaven.Models.AccountViewModels;
 using Infrastructure;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using PagedList.Core;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
 
 namespace IdentityCoreRaven.Controllers
 {
-    [Authorize]
+
     public class UserController : RavenController
     {
         private readonly UserManager<CustomUser> _userManager;
@@ -20,11 +20,16 @@ namespace IdentityCoreRaven.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Index(int? page, CancellationToken cancellationToken = default)
         {
-            var users = await _userManager.Users.ToListAsync(cancellationToken);
-            
-            return View(users);
+            var pageNumber = page == null || page <= 0 ? 1 : page.Value;
+            var pageSize = 5;
+
+            var users = await _userManager.Users.ToArrayAsync(cancellationToken);
+
+            var pagedList = new StaticPagedList<CustomUser>(users.Skip((pageNumber - 1) * pageSize).Take(pageSize), pageNumber, pageSize, users.Length);
+
+            return View(pagedList);
         }
 
         [HttpGet]

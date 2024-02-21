@@ -6,7 +6,7 @@ namespace Infrastructure
     {
         public const string AdminRole = "Admin";
         public const string UserRole = "User";
-
+        
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
 
