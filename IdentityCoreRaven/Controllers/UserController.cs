@@ -49,7 +49,7 @@ namespace IdentityCoreRaven.Controllers
                     UserName = model.Email,
                     Email = model.Email,
                     LastName = model.LastName,
-                    FirstName = model.FirstName
+                    FirstName = model.FirstName,
                 };
 
                 var creationResult = await _userManager.CreateAsync(user, model.Password);
