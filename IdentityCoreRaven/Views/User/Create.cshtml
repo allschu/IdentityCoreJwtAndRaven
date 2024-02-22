@@ -1,10 +1,10 @@
-﻿@model IdentityCoreRaven.Models.AccountViewModels.RegisterViewModel
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model IdentityCoreRaven.Models.AccountViewModels.RegisterViewModel
 
 @{
     ViewData["Title"] = "Register";
 }
 
-<h1>@ViewData["Title"].</h1>
 
 <form asp-controller="User" asp-action="Create" method="post" class="form-horizontal" role="form">
     <h4>Create a new account.</h4>
@@ -58,6 +58,6 @@
     </div>
 </form>
 
-@section Scripts {
+@section PageScripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }
