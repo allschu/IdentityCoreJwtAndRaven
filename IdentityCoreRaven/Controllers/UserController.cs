@@ -1,5 +1,7 @@
 ﻿using IdentityCoreRaven.Models.AccountViewModels;
 using Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PagedList.Core;
@@ -18,8 +20,19 @@ namespace IdentityCoreRaven.Controllers
         {
             _userManager = userManager;
         }
+        
+
+        [HttpGet("all")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetAsync(CancellationToken cancellationToken)
+        {
+            var users = await _userManager.Users.ToListAsync(cancellationToken);
+
+            return Ok(users.Select(x => x.Email).ToArray());
+        }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Index(int? page, CancellationToken cancellationToken = default)
         {
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;

@@ -1,16 +1,16 @@
 ﻿using IdentityCoreRaven.Models;
 using Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Raven.Client.Documents;
 using System.Security.Cryptography;
+using System.Text;
 
 
 namespace IdentityCoreRaven.Controllers
@@ -31,15 +31,6 @@ namespace IdentityCoreRaven.Controllers
             _userManager = userManager;
         }
 
-
-        [HttpGet]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetAsync(CancellationToken cancellationToken)
-        {
-            var users = await _userManager.Users.ToListAsync(cancellationToken);
-
-            return Ok(users.Select(x => x.Email).ToArray());
-        }
 
         /// <summary>
         /// Login the user, by generating a JWT token
